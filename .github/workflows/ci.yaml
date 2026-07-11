@@ -38,3 +38,6 @@ jobs:
 
             - name: Run tests (if present)
               run: npm test || echo "No tests found"
+            
+            - name: Generate Prisma Client
+              run: npx prisma generate
