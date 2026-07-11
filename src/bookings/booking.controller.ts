@@ -14,6 +14,8 @@ import { CreateBookingDto } from './dto/create-booking-dto';
 import { UpdateBookingStatusDto } from './dto/update-booking.dto';
 import { BookingService } from './booking.service';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { BookingQueryDto } from './dto/booking-query.dto';
+import { Query } from '@nestjs/common';
 
 @ApiTags('Bookings')
 @Controller('bookings')
@@ -34,8 +36,8 @@ export class BookingController {
   })
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.bookingService.findAll();
+  findAll(@Query() query: BookingQueryDto) {
+    return this.bookingService.findAll(query);
   }
 
   @ApiBearerAuth()
