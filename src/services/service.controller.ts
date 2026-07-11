@@ -14,6 +14,8 @@ import { CreateServiceDto } from './dto/create-service.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ServiceQueryDto } from './dto/service-query.dto';
+import { Query } from '@nestjs/common';
 
 @ApiTags('Services')
 @Controller('services')
@@ -34,8 +36,8 @@ export class ServiceController {
     summary: 'Get all services',
   })
   @Get()
-  findAll() {
-    return this.serviceService.findAll();
+  findAll(@Query() query: ServiceQueryDto) {
+    return this.serviceService.findAll(query);
   }
 
   @ApiOperation({

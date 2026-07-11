@@ -6,6 +6,8 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking-dto';
 import { BookingStatus } from '@prisma/client';
+import { BookingQueryDto } from './dto/booking-query.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class BookingService {
@@ -48,12 +50,62 @@ export class BookingService {
     });
   }
 
-  async findAll() {
-    return this.prisma.booking.findMany({
-      include: {
-        service: true,
+  async findAll(query: BookingQueryDto) {
+    const { page, limit, search, status } = query;
+
+    const where: Prisma.BookingWhereInput = {};
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (search) {
+      where.OR = [
+        {
+          customerName: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          customerEmail: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          customerPhone: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      ];
+    }
+
+    const [bookings, total] = await this.prisma.$transaction([
+      this.prisma.booking.findMany({
+        where,
+        include: {
+          service: true,
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: {
+          bookingDate: 'asc',
+        },
+      }),
+      this.prisma.booking.count({ where }),
+    ]);
+
+    return {
+      data: bookings,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-    });
+    };
   }
 
   async findOne(id: number) {
